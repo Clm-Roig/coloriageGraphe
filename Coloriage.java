@@ -24,8 +24,7 @@ public class Coloriage {
 		 /		   \|
 		D --pref--- C
 
-		(D,C) est une arrête de préférence
-
+		(D,C) est une arête de préférence
 	/* -------------------------- */
 	/* --------- SOMMET --------- */
 	/* -------------------------- */
