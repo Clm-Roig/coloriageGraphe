@@ -12,6 +12,20 @@ public class Coloriage {
 	static Arete db = new Arete(D,B,false);
 	static Arete ac = new Arete(A,C,false);
 
+	/*
+	Graphe testé :
+
+		A ---------	B
+		  \		   /|					
+    		\	 /	|
+			  \/    |
+		     / \	|
+		   /  	 \	|
+		 /		   \|
+		D --pref--- C
+
+		(D,C) est une arrête de préférence
+
 	/* -------------------------- */
 	/* --------- SOMMET --------- */
 	/* -------------------------- */
@@ -50,11 +64,14 @@ public class Coloriage {
 		ArrayList<Arete> aretes = new ArrayList<Arete>();
 		ArrayList<String> couleurs = new ArrayList<String>();
 
-		public Graphe() {
+		public Graphe(int nbCoul) {
 			sommets.add(A); sommets.add(B); sommets.add(C); sommets.add(D);
 			aretes.add(ab); aretes.add(bc); aretes.add(cd); aretes.add(db); aretes.add(ac);
-			couleurs.add("RED"); couleurs.add("GREEN"); 
-			//couleurs.add("BLUE") ; couleurs.add("YELLOW");
+			if(nbCoul >= 1) couleurs.add("RED"); 
+			if(nbCoul >= 2)	couleurs.add("GREEN"); 
+			if(nbCoul >= 3)	couleurs.add("YELLOW"); 
+			if(nbCoul >= 4)	couleurs.add("BLUE"); 
+			if(nbCoul >= 5)	couleurs.add("PURPLE"); 
 		}
 
 		public Graphe(Graphe g) {
@@ -227,9 +244,11 @@ public class Coloriage {
 
 	public static void main(String[] args) {
 		// Graphe déjà saisi dans le code
-		Graphe graphe = new Graphe();
+		int nbCoul = 2;
+
+		Graphe graphe = new Graphe(nbCoul);
 		System.out.println(graphe.toString());
-		graphe.colorier(graphe,2);
+		graphe.colorier(graphe,nbCoul);
 		System.out.println(A + " , " + B + " , " + C + " , " + D);
 	}
 }
