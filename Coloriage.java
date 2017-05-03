@@ -1,7 +1,30 @@
 import java.util.ArrayList;
 
 public class Coloriage {
+	// Sommets et Aretes du graphe
+	static Sommet A = new Sommet("A");
+	static Sommet B = new Sommet("B");
+	static Sommet C = new Sommet("C");
+	static Sommet D = new Sommet("D");
+	static Arete ab = new Arete(A,B,false);
+	static Arete bc = new Arete(B,C,false);
+	static Arete cd = new Arete(C,D,true);
+	static Arete db = new Arete(D,B,false);
+	static Arete ac = new Arete(A,C,false);
 
+	/*
+	Graphe testé :
+
+		A ---------	B
+		  \		   /|					
+    		\	 /	|
+			  \/    |
+		     / \	|
+		   /  	 \	|
+		 /		   \|
+		D --pref--- C
+
+		(D,C) est une arête de préférence
 	/* -------------------------- */
 	/* --------- SOMMET --------- */
 	/* -------------------------- */
@@ -27,10 +50,7 @@ public class Coloriage {
 		public Arete(Sommet s1, Sommet s2, boolean pref){this.s1 = s1; this.s2 = s2; this.isPref = pref;}
 
 		public String toString() {
-			String res = "" + s1.toString() + "---";
-			if(isPref)res+="p";
-			res += "---" + s2.toString();
-			return res;
+			return "" + s1.toString() + "--"+ isPref +"--" + s2.toString();
 		}
 	}
 
@@ -39,30 +59,13 @@ public class Coloriage {
 	/* --------- GRAPHE --------- */
 	/* -------------------------- */
 	public static class Graphe {
-		String name;
-
 		ArrayList<Sommet> sommets = new ArrayList<Sommet>();
 		ArrayList<Arete> aretes = new ArrayList<Arete>();
 		ArrayList<String> couleurs = new ArrayList<String>();
 
-		// Ces deux listes ne sont jamais modifiées par les fonctions (contrairement à
-		// sommets et aretes qui sont vidées par colorier())
-		ArrayList<Arete> aretesFixes = new ArrayList<Arete>();
-		ArrayList<Sommet> sommetsFixes = new ArrayList<Sommet>();
-
-		public Graphe(String n, int nbCoul, ArrayList<Sommet> listSom, ArrayList<Arete> listAr) {
-			this.name = n;
-
-			for(Sommet s : listSom) {
-				sommets.add(s); 
-				sommetsFixes.add(s);
-			}
-			
-			for(Arete a : listAr) {
-				aretes.add(a);
-				aretesFixes.add(a);
-			}	
-
+		public Graphe(int nbCoul) {
+			sommets.add(A); sommets.add(B); sommets.add(C); sommets.add(D);
+			aretes.add(ab); aretes.add(bc); aretes.add(cd); aretes.add(db); aretes.add(ac);
 			if(nbCoul >= 1) couleurs.add("RED"); 
 			if(nbCoul >= 2)	couleurs.add("GREEN"); 
 			if(nbCoul >= 3)	couleurs.add("YELLOW"); 
@@ -71,22 +74,19 @@ public class Coloriage {
 		}
 
 		public Graphe(Graphe g) {
-			this.name = g.name;
 			this.sommets = new ArrayList<Sommet>(g.sommets);
-			this.sommetsFixes = new ArrayList<Sommet>(g.sommetsFixes);
 			this.aretes = new ArrayList<Arete>(g.aretes);
-			this.aretesFixes = new ArrayList<Arete>(g.aretesFixes);
 			this.couleurs = new ArrayList<String>(g.couleurs);
 		}
 
 		public String toString() {
-			String res = "\n---- GRAPHE " + this.name + " ---\nSommets : ";
-			for(Sommet s : this.sommetsFixes) {
+			String res = "\nSommets : ";
+			for(Sommet s : this.sommets) {
 				res += s.toString() + "  "; 
 			}
-			res += "\nAretes : \n";
+			res += "\nAretes : ";
 
-			for(Arete ar : this.aretesFixes) {
+			for(Arete ar : this.aretes) {
 				res += ar.toString() + "  \n"; 
 			}
 			return res;
@@ -95,6 +95,7 @@ public class Coloriage {
 		// Renvoie un sommet du graphe trivialement coloriable s'il existe, sinon null
 		public Sommet somTrivial(int nbCoul) {
 			Sommet res = null;
+
 			for(Sommet s : sommets) {
 
 				// Comptage du nombre d'aretes dans lesquelles le sommet est présent
@@ -102,9 +103,7 @@ public class Coloriage {
 
 				for(Arete ar : aretes) {
 					if(ar.s1 == s || ar.s2 == s){
-						if(!ar.isPref) {
-							nbApparition++;
-						}
+						nbApparition++;
 					}
 				}
 
@@ -121,7 +120,7 @@ public class Coloriage {
 		public void removeAretesSom(Sommet s) {
 			ArrayList<Arete> aretesToRemove = new ArrayList<Arete>();
 			for(Arete ar : this.aretes) {
-				if(ar.s1.equals(s) || ar.s2.equals(s)) {
+				if(ar.s1 == s || ar.s2 == s) {
 					aretesToRemove.add(ar);
 				}
 			}
@@ -131,22 +130,17 @@ public class Coloriage {
 		// Colorie les sommets du graphe
 		public void colorier(Graphe g,int nbCoul) {
 			Sommet s = somTrivial(nbCoul);
-			if(s != null) {	
+			if(s != null) {
 
+				Graphe grapheSaved = new Graphe(this);
+	
 				this.removeAretesSom(s);
 				this.sommets.remove(s);
 				colorier(this, nbCoul);
 
-				// Récupération du sommet dans sommetsFixes
-				for(Sommet sF : sommetsFixes) {
-					if(sF.equals(s)){
-						s = sF;
-					}
-				}				
-
 				// Coloriage de s
 				ArrayList<String> couleursProches = new ArrayList<String>();
-				for(Arete ar : this.aretesFixes) {
+				for(Arete ar : grapheSaved.aretes) {
 					// s dans l'arrête ?
 					if(ar.s1 == s) {
 						// Arrête de préférence ?
@@ -171,7 +165,7 @@ public class Coloriage {
 				// s n'apparaît dans aucune arrête de préférence et on connaît les couleurs proches
 				// Il prend une des couleurs autres que les proches
 				if(s.couleur == "void") {
-					ArrayList<String> listeCouleursGraphe = new ArrayList<String>(this.couleurs);
+					ArrayList<String> listeCouleursGraphe = new ArrayList<String>(grapheSaved.couleurs);
 					listeCouleursGraphe.removeAll(couleursProches);
 					s.couleur = listeCouleursGraphe.get(0);
 				}
@@ -200,22 +194,16 @@ public class Coloriage {
 					}
 				}
 
-				// On appelle récursivement sur this sans le sommet
+				// On sauve le graphe complet et on appelle récursivement sur this sans le sommet
+				Graphe grapheSaved = new Graphe(this);
 				this.removeAretesSom(s);
 				this.sommets.remove(s);
-				colorier(this, nbCoul);		
-
-				// Récupération du sommet dans sommetsFixes
-				for(Sommet sF : sommetsFixes) {
-					if(sF.equals(s)){
-						s = sF;
-					}
-				}				
+				colorier(this, nbCoul);						
 
 				// Y a-t-il une couleur dispo ? 
 				// Coloriage de s
 				ArrayList<String> couleursProches = new ArrayList<String>();
-				for(Arete ar : this.aretesFixes) {
+				for(Arete ar : grapheSaved.aretes) {
 					// s dans l'arrête ?
 					if(ar.s1 == s) {
 						// Arrête de préférence ?
@@ -240,7 +228,7 @@ public class Coloriage {
 				// s n'apparaît dans aucune arrête de préférence et on connaît les couleurs proches
 				// Il prend une des couleurs autres que les proches si possible, sinon il est spillé
 				if(s.couleur == "void") {
-					ArrayList<String> listeCouleursGraphe = new ArrayList<String>(this.couleurs);
+					ArrayList<String> listeCouleursGraphe = new ArrayList<String>(grapheSaved.couleurs);
 					listeCouleursGraphe.removeAll(couleursProches);
 					if(listeCouleursGraphe.isEmpty()){
 						s.couleur = "spilled";
@@ -253,130 +241,13 @@ public class Coloriage {
 		}
 	}
 
-	public static void main(String[] args) {	
+	public static void main(String[] args) {
+		// Graphe déjà saisi dans le code
+		int nbCoul = 2;
 
-		/* ===== GRAPHE1 ===== */
-		/*
-			A ---------	B
-			  \		   /|					
-	    		\	 /	|
-				  \/    |
-			     / \	|
-			   /  	 \	|
-			 /		   \|
-			D --pref--- C
-
-			(D,C) est une arête de préférence
-		*/
-
-		/* Nb de couleurs avec lequel vous souhaitez colorier le graphe 1*/
-		int nbCoulGraphe1 = 3;
-
-		ArrayList<Sommet> listSom1 = new ArrayList<Sommet>();
-		Sommet A = new Sommet("A");
-		Sommet B = new Sommet("B");
-		Sommet C = new Sommet("C");
-		Sommet D = new Sommet("D");
-		listSom1.add(A);
-		listSom1.add(B);
-		listSom1.add(C);
-		listSom1.add(D);
-
-		ArrayList<Arete> listAr1 = new ArrayList<Arete>();
-		listAr1.add(new Arete(B,C,false));
-		listAr1.add(new Arete(C,D,true));
-		listAr1.add(new Arete(D,B,false));
-		listAr1.add(new Arete(A,C,false));
-		listAr1.add(new Arete(A,B,false));
-
-		Graphe graphe1 = new Graphe("1",nbCoulGraphe1,listSom1,listAr1);
-
-		/* ===== GRAPHE2 ===== */
-		/*
-						X ---------	Y
-					  /	  \		   /|					
-			Z	     /		\	 /	|		
-			|		/		  \/    |
-			|	   /	     / \	|		
-			V ----  	   /  	 \	|
-			  \			 /		   \|
-				--------T --pref--- U
-
-			(T,U) est une arête de préférence
-		*/
-
-		int nbCoulGraphe2 = 2;
-
-		ArrayList<Sommet> listSom2 = new ArrayList<Sommet>();
-		Sommet X = new Sommet("X");
-		Sommet Y = new Sommet("Y");
-		Sommet Z = new Sommet("Z");
-		Sommet T = new Sommet("T");
-		Sommet U = new Sommet("U");
-		Sommet V = new Sommet("V");
-		listSom2.add(X);
-		listSom2.add(Y);
-		listSom2.add(Z);
-		listSom2.add(T);
-		listSom2.add(U);
-		listSom2.add(V);
-
-		ArrayList<Arete> listAr2 = new ArrayList<Arete>();
-		listAr2.add(new Arete(Z,V,false));
-		listAr2.add(new Arete(V,X,false));
-		listAr2.add(new Arete(V,T,false));
-		listAr2.add(new Arete(X,Y,false));
-		listAr2.add(new Arete(X,U,false));
-		listAr2.add(new Arete(Y,T,false));
-		listAr2.add(new Arete(Y,U,false));
-		listAr2.add(new Arete(T,U,true));
-
-		Graphe graphe2 = new Graphe("2",nbCoulGraphe2,listSom2,listAr2);
-		
-
-		/* ===== GRAPHE 3 ===== */
-		/*
-			l ---------	m
-			|  	   		|					
-	    	|		 	|
-			|	    	|
-			|    		|
-			|    	 	|
-			| 		   	|
-			o --------- n
-		*/
-		int nbCoulGraphe3 = 2;
-
-		ArrayList<Sommet> listSom3 = new ArrayList<Sommet>();
-		Sommet l = new Sommet("l");
-		Sommet m = new Sommet("m");
-		Sommet n = new Sommet("n");
-		Sommet o = new Sommet("o");
-		listSom3.add(l);
-		listSom3.add(m);
-		listSom3.add(n);
-		listSom3.add(o);
-
-		ArrayList<Arete> listAr3 = new ArrayList<Arete>();
-		listAr3.add(new Arete(l,m,false));
-		listAr3.add(new Arete(m,n,false));
-		listAr3.add(new Arete(n,o,false));
-		listAr3.add(new Arete(o,l,false));
-
-		Graphe graphe3 = new Graphe("3",nbCoulGraphe3,listSom3,listAr3);
-
-
-		
-		System.out.println(graphe1.toString());
-		graphe1.colorier(graphe1,nbCoulGraphe1);
-		System.out.println("Après coloriage avec "+ nbCoulGraphe1 + " couleurs : \n" + graphe1.toString()+"\n\n");
-
-		System.out.println(graphe2.toString());
-		graphe2.colorier(graphe2,nbCoulGraphe2);
-		System.out.println("Après coloriage avec "+ nbCoulGraphe2 + " couleurs : \n" + graphe2.toString()+"\n\n");
-
-		System.out.println(graphe3.toString());
-		graphe3.colorier(graphe3,nbCoulGraphe3);
-		System.out.println("Après coloriage avec "+ nbCoulGraphe3 + " couleurs : \n" + graphe3.toString()+"\n\n");
+		Graphe graphe = new Graphe(nbCoul);
+		System.out.println(graphe.toString());
+		graphe.colorier(graphe,nbCoul);
+		System.out.println(A + " , " + B + " , " + C + " , " + D);
 	}
 }
