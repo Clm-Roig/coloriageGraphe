@@ -1,3 +1,6 @@
+// Algorithme de coloriage de graphes
+// AUTEURS : Clément ROIG & Adrien ROUX
+
 import java.util.ArrayList;
 
 public class Coloriage {
