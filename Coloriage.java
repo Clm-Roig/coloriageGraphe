@@ -49,25 +49,29 @@ public class Coloriage {
 		ArrayList<Arete> aretesFixes = new ArrayList<Arete>();
 		ArrayList<Sommet> sommetsFixes = new ArrayList<Sommet>();
 
+		// Constructeur de base d'un GRaphe
 		public Graphe(String n, int nbCoul, ArrayList<Sommet> listSom, ArrayList<Arete> listAr) {
 			this.name = n;
 
 			for(Sommet s : listSom) {
-				sommets.add(s); 
+				sommets.add(s);
 				sommetsFixes.add(s);
 			}
 			for(Arete a : listAr) {
 				aretes.add(a);
 				aretesFixes.add(a);
-			}	
+			}
 
-			if(nbCoul >= 1) couleurs.add("RED"); 
-			if(nbCoul >= 2)	couleurs.add("GREEN"); 
-			if(nbCoul >= 3)	couleurs.add("YELLOW"); 
-			if(nbCoul >= 4)	couleurs.add("BLUE"); 
-			if(nbCoul >= 5)	couleurs.add("PURPLE"); 
+			// Le nombre de couleurs disponibles varie
+			if(nbCoul >= 1) couleurs.add("RED");
+			if(nbCoul >= 2)	couleurs.add("GREEN");
+			if(nbCoul >= 3)	couleurs.add("YELLOW");
+			if(nbCoul >= 4)	couleurs.add("BLUE");
+			if(nbCoul >= 5)	couleurs.add("PURPLE");
+			if(nbCoul >= 6)	couleurs.add("WHITE");
 		}
 
+		// Constructeur de Graphe par recopie
 		public Graphe(Graphe g) {
 			this.name = g.name;
 			this.sommets = new ArrayList<Sommet>(g.sommets);
@@ -80,12 +84,12 @@ public class Coloriage {
 		public String toString() {
 			String res = "\n---- GRAPHE " + this.name + " ---\nSommets : ";
 			for(Sommet s : this.sommetsFixes) {
-				res += s.toString() + "  "; 
+				res += s.toString() + "  ";
 			}
 			res += "\nAretes : \n";
 
 			for(Arete ar : this.aretesFixes) {
-				res += ar.toString() + "  \n"; 
+				res += ar.toString() + "  \n";
 			}
 			return res;
 		}
@@ -95,7 +99,7 @@ public class Coloriage {
 			Sommet res = null;
 			for(Sommet s : sommets) {
 
-				// Comptage du nombre d'aretes dans lesquelles le sommet est présent
+				// Détermiation du degré d'un sommet (ommission des arrêtes de préférence)
 				int nbApparition = 0;
 
 				for(Arete ar : aretes) {
@@ -115,7 +119,7 @@ public class Coloriage {
 			return res;
 		}
 
-		// Remove toutes les aretes qui concernent un sommet
+		// Supprime toutes les aretes qui concernent un sommet
 		public void removeAretesSom(Sommet s) {
 			ArrayList<Arete> aretesToRemove = new ArrayList<Arete>();
 			for(Arete ar : this.aretes) {
@@ -126,10 +130,10 @@ public class Coloriage {
 			this.aretes.removeAll(aretesToRemove);
 		}
 
-		// Colorie les sommets du graphe
+		// Colorie les sommets du graphe (fonction récursive)
 		public void colorier(Graphe g,int nbCoul) {
 			Sommet s = somTrivial(nbCoul);
-			if(s != null) {	
+			if(s != null) {
 
 				this.removeAretesSom(s);
 				this.sommets.remove(s);
@@ -140,7 +144,7 @@ public class Coloriage {
 					if(sF.equals(s)){
 						s = sF;
 					}
-				}				
+				}
 
 				// Coloriage de s
 				ArrayList<String> couleursProches = new ArrayList<String>();
@@ -177,8 +181,8 @@ public class Coloriage {
 			}
 
 			else if(!this.sommets.isEmpty()) {
-				
-				// Choix du sommet de plus haut degré 
+
+				// Choix du sommet de plus haut degré
 				// Comptage du nombre d'aretes dans lesquelles le sommet est présent
 				int nbApparitionMax = 0;
 				for(Sommet sMax : sommets) {
@@ -201,16 +205,16 @@ public class Coloriage {
 				// On appelle récursivement sur this sans le sommet
 				this.removeAretesSom(s);
 				this.sommets.remove(s);
-				colorier(this, nbCoul);		
+				colorier(this, nbCoul);
 
 				// Récupération du sommet dans sommetsFixes
 				for(Sommet sF : sommetsFixes) {
 					if(sF.equals(s)){
 						s = sF;
 					}
-				}				
+				}
 
-				// Y a-t-il une couleur dispo ? 
+				// Y a-t-il une couleur dispo ?
 				// Coloriage de s
 				ArrayList<String> couleursProches = new ArrayList<String>();
 				for(Arete ar : this.aretesFixes) {
@@ -251,12 +255,12 @@ public class Coloriage {
 		}
 	}
 
-	public static void main(String[] args) {	
+	public static void main(String[] args) {
 
 		/* ===== GRAPHE1 ===== */
 		/*
 			A ---------	B
-			  \		   /|					
+			  \		   /|
 	    		\	 /	|
 				  \/    |
 			     / \	|
@@ -292,17 +296,16 @@ public class Coloriage {
 		/* ===== GRAPHE2 ===== */
 		/*
 						X ---------	Y
-					  /	  \		   /|					
-			Z	     /		\	 /	|		
+					  /	  \		   /|
+			Z	     /		\	 /	|
 			|		/		  \/    |
-			|	   /	     / \	|		
+			|	   /	     / \	|
 			V ----  	   /  	 \	|
 			  \			 /		   \|
 				--------T --pref--- U
 
 			(T,U) est une arête de préférence
 		*/
-
 		int nbCoulGraphe2 = 2;
 
 		ArrayList<Sommet> listSom2 = new ArrayList<Sommet>();
@@ -330,12 +333,12 @@ public class Coloriage {
 		listAr2.add(new Arete(T,U,true));
 
 		Graphe graphe2 = new Graphe("2",nbCoulGraphe2,listSom2,listAr2);
-		
+
 
 		/* ===== GRAPHE 3 ===== */
 		/*
 			l ---------	m
-			|  	   		|					
+			|  	   		|
 	    	|		 	|
 			|	    	|
 			|    		|
@@ -364,7 +367,7 @@ public class Coloriage {
 		Graphe graphe3 = new Graphe("3",nbCoulGraphe3,listSom3,listAr3);
 
 
-		
+
 		System.out.println(graphe1.toString());
 		graphe1.colorier(graphe1,nbCoulGraphe1);
 		System.out.println("Après coloriage avec "+ nbCoulGraphe1 + " couleurs : \n" + graphe1.toString()+"\n\n");
